@@ -1,18 +1,24 @@
-use base64::{Engine, engine::general_purpose};
+use std::fs;
 
-use crate::{cryptography::Crypto, oci_storage_client::OciClient};
+use base64::{Engine, engine::general_purpose};
+use openssl::string;
+use crate::{cryptography::Crypto, oci_storage_client::OciClient, utils::get_oci_pem_path};
 
 mod cryptography;
 mod utils;
 mod oci_storage_client;
 
-fn main() {
-    
-    let client: OciClient = OciClient::new();
-    let header: String = String::from("Hello, Crypto!");
-    
-    //let crypto: Crypto = Crypto::new(&pem_path);
-    //let signed: Vec<u8> = crypto.sign(header);
-    //let signature_str = general_purpose::STANDARD.encode(signed);
-    //println!("{:?}", signature_str);
+
+#[tokio::main]
+async fn main() {
+    let region: String = String::from("<region>");
+    let namespace: String = String::from("<namespace>");
+    let profile_name: String = String::from(""); // "" for [DEFAULT]
+        
+
+    let client: OciClient = OciClient::new(region, namespace, profile_name);
+
+    let result: Vec<u8> = client.get_object("<bucket>", "<object>").await.unwrap();
+
+     fs::write("./data", result).expect("Failed to write");
 }
